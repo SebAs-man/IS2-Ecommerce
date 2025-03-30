@@ -1,6 +1,6 @@
-package com.ecommerce.catalog.product.Domain.constant;
+package com.ecommerce.catalog.product.domain.constant;
 
-import static com.ecommerce.catalog.product.Domain.constant.AttributeType.*;
+import static com.ecommerce.catalog.product.domain.constant.AttributeType.*;
 
 /**
  * Listado de claves válidas en la base de datos para los atributos adicionales del producto.

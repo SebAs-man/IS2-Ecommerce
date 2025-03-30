@@ -1,9 +1,9 @@
-package com.ecommerce.catalog.product.Application.mapper;
+package com.ecommerce.catalog.product.application.mapper;
 
-import com.ecommerce.catalog.product.Application.dto.AttributeDTO;
-import com.ecommerce.catalog.product.Application.dto.response.ProductResponseDTO;
-import com.ecommerce.catalog.product.Domain.model.Attribute;
-import com.ecommerce.catalog.product.Domain.model.Product;
+import com.ecommerce.catalog.product.application.dto.AttributeDTO;
+import com.ecommerce.catalog.product.application.dto.response.ProductResponseDTO;
+import com.ecommerce.catalog.product.domain.model.Attribute;
+import com.ecommerce.catalog.product.domain.model.Product;
 import org.mapstruct.Mapper;
 
 import java.util.List;

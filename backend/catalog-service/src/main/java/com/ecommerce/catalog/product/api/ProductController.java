@@ -1,9 +1,9 @@
 package com.ecommerce.catalog.product.api;
 
-import com.ecommerce.catalog.product.Application.dto.request.ProductRequestDTO;
-import com.ecommerce.catalog.product.Application.dto.response.ProductResponseDTO;
+import com.ecommerce.catalog.product.application.dto.request.ProductRequestDTO;
+import com.ecommerce.catalog.product.application.dto.response.ProductResponseDTO;
 import com.ecommerce.catalog.sharedkernel.api.GenericController;
-import com.ecommerce.catalog.product.Application.ProductApplicationService;
+import com.ecommerce.catalog.product.application.ProductApplicationService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

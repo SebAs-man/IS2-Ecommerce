@@ -1,13 +1,13 @@
-package com.ecommerce.catalog.product.Application;
+package com.ecommerce.catalog.product.application;
 
-import com.ecommerce.catalog.product.Application.dto.AttributeDTO;
-import com.ecommerce.catalog.product.Application.dto.request.ProductRequestDTO;
-import com.ecommerce.catalog.product.Application.dto.response.ProductResponseDTO;
-import com.ecommerce.catalog.product.Application.mapper.ProductMapper;
-import com.ecommerce.catalog.product.Domain.constant.AttributeKey;
-import com.ecommerce.catalog.product.Domain.model.Attribute;
-import com.ecommerce.catalog.product.Domain.model.Product;
-import com.ecommerce.catalog.product.Domain.repository.ProductRepository;
+import com.ecommerce.catalog.product.application.dto.AttributeDTO;
+import com.ecommerce.catalog.product.application.dto.request.ProductRequestDTO;
+import com.ecommerce.catalog.product.application.dto.response.ProductResponseDTO;
+import com.ecommerce.catalog.product.application.mapper.ProductMapper;
+import com.ecommerce.catalog.product.domain.constant.AttributeKey;
+import com.ecommerce.catalog.product.domain.model.Attribute;
+import com.ecommerce.catalog.product.domain.model.Product;
+import com.ecommerce.catalog.product.domain.repository.ProductRepository;
 import com.ecommerce.catalog.sharedkernel.application.GenericService;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;

@@ -1,6 +1,5 @@
-package com.ecommerce.catalog.product.Application.dto;
+package com.ecommerce.catalog.product.application.dto;
 
-import com.ecommerce.catalog.product.Domain.constant.AttributeType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 

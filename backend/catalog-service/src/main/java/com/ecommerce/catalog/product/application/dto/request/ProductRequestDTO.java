@@ -1,6 +1,6 @@
-package com.ecommerce.catalog.product.Application.dto.request;
+package com.ecommerce.catalog.product.application.dto.request;
 
-import com.ecommerce.catalog.product.Application.dto.AttributeDTO;
+import com.ecommerce.catalog.product.application.dto.AttributeDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 

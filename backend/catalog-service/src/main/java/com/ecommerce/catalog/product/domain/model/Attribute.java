@@ -1,10 +1,9 @@
-package com.ecommerce.catalog.product.Domain.model;
+package com.ecommerce.catalog.product.domain.model;
 
-import com.ecommerce.catalog.product.Domain.constant.AttributeKey;
-import com.ecommerce.catalog.product.Domain.constant.AttributeType;
+import com.ecommerce.catalog.product.domain.constant.AttributeKey;
+import com.ecommerce.catalog.product.domain.constant.AttributeType;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 /**

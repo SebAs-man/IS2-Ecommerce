@@ -1,4 +1,4 @@
-package com.ecommerce.catalog.product.Domain.constant;
+package com.ecommerce.catalog.product.domain.constant;
 
 /**
  * Enumeración para definir los tipos de datos posibles en cada uno de los atributos

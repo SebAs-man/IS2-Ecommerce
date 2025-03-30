@@ -1,6 +1,6 @@
-package com.ecommerce.catalog.product.Domain.model;
+package com.ecommerce.catalog.product.domain.model;
 
-import com.ecommerce.catalog.product.Domain.constant.AttributeKey;
+import com.ecommerce.catalog.product.domain.constant.AttributeKey;
 import com.ecommerce.catalog.sharedkernel.domain.model.BaseEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;

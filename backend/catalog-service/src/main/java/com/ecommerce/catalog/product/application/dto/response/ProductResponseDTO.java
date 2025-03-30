@@ -1,6 +1,6 @@
-package com.ecommerce.catalog.product.Application.dto.response;
+package com.ecommerce.catalog.product.application.dto.response;
 
-import com.ecommerce.catalog.product.Application.dto.AttributeDTO;
+import com.ecommerce.catalog.product.application.dto.AttributeDTO;
 import org.bson.types.ObjectId;
 
 import java.util.Date;
