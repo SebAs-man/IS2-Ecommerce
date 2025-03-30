@@ -48,12 +48,15 @@ public class ProductApplicationService implements GenericService<ProductRequestD
         log.info("Solicitud para crear producto: '{}'", request.name());
         //Validar todos los atributos y crear la instancia
         List<Attribute> validateAttributes = processAndValidateAttributes(request.attributes());
+        if(request.quantity() == null) {
+
+        }
         Product product = new Product(
                 request.name(),
                 request.price(),
-                request.quantity(),
+                request.quantity() == null ? 0 : request.quantity(),
                 true,
-                request.description(),
+                request.description() == null ? "" : request.description(),
                 validateAttributes
         );
         //Guardar la nueva entidad Product en la base de datos.

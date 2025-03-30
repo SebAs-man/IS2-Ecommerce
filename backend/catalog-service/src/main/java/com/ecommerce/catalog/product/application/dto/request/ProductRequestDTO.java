@@ -19,7 +19,6 @@ public record ProductRequestDTO(
         @PositiveOrZero(message = "Price must be zero or positive.")
         Double price,
 
-        @NotNull(message = "Quantity cannot be null.")
         @PositiveOrZero(message = "Quantity must be zero or positive.")
         Integer quantity,
 
