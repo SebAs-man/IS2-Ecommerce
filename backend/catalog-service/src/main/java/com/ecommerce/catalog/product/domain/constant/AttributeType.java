@@ -1,13 +1,15 @@
 package com.ecommerce.catalog.product.domain.constant;
 
 /**
- * Enumeración para definir los tipos de datos posibles en cada uno de los atributos
- * adicionales que tenga el modelo de producto.
+ * Define los tipos de datos posibles para los valores de los atributos.
+ * Usado en Attribute para validación e interpretación.
  */
 public enum AttributeType {
     STRING,
     INTEGER,
     DOUBLE,
     BOOLEAN,
-    LIST_STRING
+    COLOR_HEX,   // Valida formato #RRGGBB o #RGB
+    LIST_STRING;
+    // ...otros si son necesarios...
 }

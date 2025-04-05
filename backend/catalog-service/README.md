@@ -1,120 +1,92 @@
-# Microservicio de Catálogo (Proyecto e-commerce IS2)
+# Microservicio de Catálogo (`catalog-service`)
+
+**Contexto:** Este servicio es parte del [Monorepo E-commerce](../../../README.md) y su código reside en `backend/catalog-service/`. Consulta el [README del Backend](../README.md) para patrones y tecnologías comunes.
 
 ## Descripción
-Es un microservicio cuya responsabilidad principal es gestionar toda la información relacionada con los productos del catálogo, incluyendo sus categorías y atributos dinámicos. Proporciona una API REST para operaciones CRUD y consultas sobre productos y categorías.
 
+Este microservicio es el responsable de gestionar toda la información relacionada con el catálogo de productos del e-commerce. Sus responsabilidades principales incluyen:
 
-## Arquitectura y diseño
-Este microservicio se ha diseñado siguiendo varios principios y patrones clave para buscar organización, mantenibilidad y escalabilidad:
-* **Arquitectura de Microservicios:** Diseñado para funcionar como una unidad independiente dentro de un sistema de e-commerce más grande.
-* **Estructura por Funcionalidad (Feature-based):** El código se organiza en paquetes por capacidad de negocio (ej.: `product`, `category`) para mejorar la cohesión y reducir el acoplamiento entre funcionalidades.
-* **Capas Arquitectónicas (Dentro de cada Feature):** Cada funcionalidad sigue una separación por capas:
-    * `api`: Controladores REST y exposición de la API.
-    * `application`: Orquestación de casos de uso, DTO, Mappers, Servicios de Aplicación.
-    * `domain`: El núcleo del negocio. Entidades, Value Objects, Interfaces de Repositorio, lógica y reglas de negocio fundamentales.
-    * `infrastructure`: Implementaciones técnicas (ej.: acceso a BD, clientes externos).
-* **Principios DDD (Domain-Driven Design) Ligeros:**
-    * Uso de **Value Objects** (ej.: `Attribute`) para representar conceptos inmutables con sus propias validaciones (usando Métodos Factoría Estáticos).
-    * Uso de **Entidades** (ej.: `Product`, `Category`, `BaseEntity`) con identidad y ciclo de vida.
-    * Encapsulación de reglas de negocio dentro del dominio (ej: validación en `Attribute.createValidatedAttribute`).
-* **Persistencia NoSQL:** Se eligió **MongoDB** como base de datos principal debido a la necesidad de flexibilidad para manejar los atributos dinámicos y variados de los productos.
-* **API REST:** Exposición de funcionalidades a través de una API REST usando Spring Web MVC.
-* **Manejo de Excepciones Global:** Se utiliza `@RestControllerAdvice` para centralizar el manejo de excepciones y devolver respuestas de error consistentes en formato JSON.
-* **Estrategia de ID:** Se utiliza el `ObjectId` de MongoDB como identificador interno (`_id`), mapeado a `String` en Java. *(Nota: Se consideró usar slugs para las URL de API, pero se pospuso por simplicidad inicial).*
-* **Inmutabilidad:** Se favorece la inmutabilidad donde tiene sentido (Value Objects, Records para DTO) para mejorar la predictibilidad y seguridad.
-* **Encapsulamiento:** Se protegen las colecciones internas de las entidades devolviendo vistas inmodificables en los getters.
+* Gestión de Productos base.
+* Gestión de Variantes de producto (SKUs, precio, stock, imágenes, atributos específicos).
+* Definición del esquema de atributos que generan variantes por producto.
+* Gestión de atributos estáticos/descriptivos de productos.
+* Gestión de Categorías y su jerarquía (multi-nivel).
+* Gestión de Marcas.
+* Proveer APIs REST para consultar y manipular esta información.
 
-## Tecnologías Utilizadas
+## Arquitectura Específica
 
-* **Lenguaje:** Java 23
-* **Framework Principal:** Spring Boot 3.4.4
-* **Persistencia:** Spring Data MongoDB
-* **Base de Datos:** MongoDB (v8.0.6)
-* **Mapeo:** MapStruct (para conversión DTO <-> Dominio)
-* **Validación:** Jakarta Bean Validation (anotaciones en DTO)
-* **Logging:** SLF4J (fachada) + Logback (implementación por defecto en Spring Boot)
-* **Build:** Maven / Gradle (elige el que uses)
-* **Testing (Planeado):** JUnit 5, Mockito, Testcontainers (para pruebas de integración con MongoDB)
-* **Control de Versiones:** Git
+Además de los patrones generales definidos en el [README del Backend](../README.md), este servicio implementa:
 
-## Estructura del Proyecto
+* **Base de Datos:** MongoDB.
+* **Modelado de Variantes:** Utiliza colecciones separadas para `products` (información base y esquema de variantes) y `variants` (unidades vendibles específicas con SKU, precio, stock, imágenes, atributos definitorios).
+* **Modelado de Categorías:** Implementa el patrón "Array of Ancestors" para consultas eficientes de subárboles jerárquicos.
+* **Modelado de Atributos:**
+    * `Product` define atributos estáticos (`Map<String, String> staticAttributes`) y el esquema de opciones de variante (`List<VariantOptionDefinition> variantOptions`).
+    * `VariantOptionDefinition` (incrustada en Product) especifica la clave (String), etiqueta (String), tipo de valor (`AttributeType` enum), si es requerida, si afecta imágenes y la lista opcional de valores permitidos (`availableValues`).
+    * `Variant` almacena los atributos que la definen en un mapa (`Map<String, Object> definingAttributes`).
+* **Concurrencia:** Utiliza bloqueo optimista (`@Version`) en la entidad `Variant` para manejar actualizaciones concurrentes de stock/precio.
+* **Auditoría:** Utiliza `@CreatedDate` y `@LastModifiedDate` con `LocalDateTime` en `BaseEntity`.
 
-El proyecto sigue una estructura de paquetes orientada a funcionalidades (features):
-```
-.
-├── .gitignore
-├── pom.xml    # Archivo de construcción
-├── README.md                  # Este archivo
-└── src
-    ├── main
-    │   ├── java
-    │   │   └── com/ecommerce/catalog/  # Raíz del código del microservicio
-    │   │       ├── product/                      # Feature: Producto
-    │   │       │   ├── api/                      # Controladores REST (ProductController)
-    │   │       │   ├── application/              # Lógica de Aplicación
-    │   │       │   │   ├── dto/                  # DTOs (Records: AttributeDTO, ProductDTOs)
-    │   │       │   │   ├── mapper/               # Mappers (ProductMapper)
-    │   │       │   │   └── ProductApplicationService.java # Servicio de Aplicación
-    │   │       │   ├── domain/                   # Lógica y Modelo de Dominio
-    │   │       │   │   ├── constant/             # Enums, Constantes (AttributeKey, AttributeType)
-    │   │       │   │   ├── exception/            # Excepciones específicas del dominio (si las hay)
-    │   │       │   │   ├── model/                # Entidades (Product), VOs (Attribute)
-    │   │       │   │   └── repository/           # Interfaces de Repositorio (ProductRepository)
-    │   │       │   └── infrastructure/           # Implementaciones Técnicas
-    │   │       │       └── persistence/          # (Implementación de repo si es custom)
-    │   │       ├── category/                     # Feature: Categoría (estructura similar)
-    │   │       │   └── ...
-    │   │       ├── sharedkernel/                 # Código compartido entre features del catálogo
-    │   │       │   ├── domain/
-    │   │       │   │   └── model/                # (BaseEntity)
-    │   │       │   ├── exceptions/               # (ResourceNotFoundException)
-    │   │       │   └── application/dto/          # (ErrorResponse)
-    │   │       ├── config/                       # Configuración global del microservicio
-    │   │       │   ├── GlobalExceptionHandler.java
-    │   │       │   ├── MongoConfig.java          # (Configuración específica de Mongo si es necesaria)
-    │   │       │   └── ...                       # (Config Audit, Security si aplica aquí)
-    │   │       └── CatalogApplication.java       # Punto de entrada Spring Boot
-    │   └── resources
-    │       ├── application.properties            # Configuración principal (BD, puerto, etc.)
-    │       └── logback-spring.xml                # (Opcional: Configuración avanzada de logging)
-    └── test
-```
+## Stack Tecnológico Específico
 
-* **`api/`**: Contiene los `@RestController` que definen los endpoints HTTP y manejan la comunicación request/response. Delega en la capa de aplicación.
-* **`application/`**: Orquesta los casos de uso. Contiene los Servicios de Aplicación (`@Service`), los DTO (Data Transfer Objects - usados para la API), y los Mappers (para convertir entre Dominio y DTO). No contiene lógica de negocio fundamental.
-* **`domain/`**: El corazón. Contiene las Entidades, Value Objects, constantes/enums del negocio, interfaces de Repositorio y la lógica de negocio fundamental (reglas, invariantes, validaciones de dominio). Debe ser independiente de la tecnología externa.
-* **`infrastructure/`**: Implementaciones concretas de interfaces del dominio o la aplicación que dependen de tecnología externa (ej.: implementación de repositorio si no basta Spring Data, clientes HTTP, etc.).
-* **`sharedkernel/`**: Código (clases base, excepciones comunes, DTO comunes) que es compartido por *múltiples features* dentro de *este mismo microservicio*.
-* **`config/`**: Clases de configuración globales para el microservicio (Beans de Spring, seguridad, manejo de excepciones global, configuración de auditoría).
+* Spring Boot 3+
+* Spring Web MVC
+* Spring Data MongoDB
+* MapStruct
+* Jakarta Bean Validation
+* Java 17+ (para `records`)
+* Maven
 
-## Configuración
+## Configuración Específica
 
-Las configuraciones principales se encuentran en `src/main/resources/application.properties`. Las claves más importantes son:
+Revisa y configura las siguientes propiedades en `src/main/resources/application.properties`:
 
-* `server.port`: Puerto donde corre el servicio (ej.: `9000`).
-* `spring.data.mongodb.uri`: URI de conexión a la base de datos MongoDB.
-* `logging.level.*`: Niveles de log para diferentes paquetes.
+* `server.port`: Puerto para este servicio (ej: `8081`).
+* `spring.application.name=catalog-service`
+* `spring.data.mongodb.uri`: URI de conexión a tu base de datos MongoDB (ej: `mongodb://localhost:27017/catalogdb`).
+* `logging.level.*`: Ajusta los niveles de log según sea necesario.
 
 ## Ejecución Local
 
-1. **Prerrequisitos:**
-  * JDK 17+ instalado.
-  * Maven instalado.
-  * Una instancia de MongoDB corriendo y accesible (local o remota).
-2. **Configuración:** Ajusta la URI de MongoDB en `application.properties`.
-3. **Construcción:**
-  * Maven: `mvn clean package`
-4. **Ejecución:**
-  * Desde la línea de comandos: `java -jar target/catalog-service-0.0.1-SNAPSHOT.jar` (ajusta el nombre del JAR)
-  * Desde el IDE: Ejecuta la clase `CatalogApplication`.
+1.  **Prerrequisitos:** Asegúrate de tener MongoDB corriendo y accesible en la URI configurada.
+2.  **Desde la Raíz del Monorepo:**
+    ```bash
+    # Construir solo este módulo (si tu build lo permite)
+    mvn clean package -pl backend/catalog-service -am
+    # Ejecutar
+    java -jar backend/catalog-service/target/*.jar
+    ```
+3.  **Desde el Directorio del Servicio:**
+    ```bash
+    cd backend/catalog-service
+    mvn spring-boot:run
+    ```
+    *(O usa los comandos `package` y `java -jar` como arriba)*
+4.  **Desde el IDE:** Ejecuta la clase `com.tuempresa.ecommerce.catalog.CatalogApplication`.
 
-El servicio estará disponible en `http://localhost:{server.port}`.
+El servicio estará disponible en `http://localhost:{server.port}` (ej: `http://localhost:8081`).
 
-## API Endpoints
-La API REST principal se encuentra bajo la ruta base `/api/v1/products`. Los endpoints principales son:
+## API Endpoints Principales
 
-* `POST /api/v1/products`: Crea un nuevo producto.
-* `GET /api/v1/products/{id}`: Obtiene un producto por su ID (ObjectId).
-* `GET /api/v1/products`: Obtiene una lista de todos los productos (añadir paginación/filtros).
-* `PUT /api/v1/products/{id}`: Actualiza un producto existente por su ID.
-* `DELETE /api/v1/products/{id}`: Elimina un producto por su ID.
+*(Idealmente, integra Springdoc-OpenAPI y pon el enlace aquí: "La documentación completa de la API está disponible en /swagger-ui.html")*
+
+* `/api/v1/brands` (GET, POST)
+* `/api/v1/brands/{idOrSlug}` (GET, PUT, DELETE)
+* `/api/v1/brands/search?name=...` (GET Paginado)
+* `/api/v1/categories` (GET, POST)
+* `/api/v1/categories/{idOrSlug}` (GET, PUT, DELETE)
+* `/api/v1/categories/tree?root=...` (GET - Ejemplo para obtener rama)
+* `/api/v1/products` (POST) - Crea producto y variante inicial
+* `/api/v1/products/{idOrSlug}` (GET, PUT) - GET obtiene producto base, PUT actualiza producto base
+* `/api/v1/products/{productId}/variants` (GET, POST) - GET obtiene variantes, POST crea nueva variante
+* `/api/v1/variants/{variantIdOrSku}` (GET, DELETE)
+* `/api/v1/variants/{variantIdOrSku}/stock` (PUT/PATCH - Ejemplo para actualizar stock)
+* *(Define los endpoints finales según tu diseño API)*
+
+## Estrategia de Testing
+
+* **Pruebas Unitarias:** Se deben crear para la lógica de dominio (entidades, VOs), servicios de aplicación (con repositorios mockeados) y mappers. Ubicadas en `src/test/java`.
+* **Pruebas de Integración:** Se deben crear para probar la interacción con MongoDB (usando Testcontainers o una BD embebida) y para probar los endpoints de la API (usando `MockMvc` o `WebTestClient`). Ubicadas en `src/test/java`.
+
+*(Opcional: Añadir detalles sobre cómo correr tests específicos)*

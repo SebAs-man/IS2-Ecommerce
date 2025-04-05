@@ -3,33 +3,42 @@ package com.ecommerce.catalog.sharedkernel.domain.model;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.mongodb.core.index.Indexed;
 
+import java.io.Serial;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
- * Clase entidad genérica.
- * Todas las entidades deberían heredar de esta clase.
+ * Clase base abstracta para entidades persistentes dentro del microservicio de Catálogo.
+ * Proporciona un ID y campos de auditoría básicos (fechas de creación/modificación).
+ * @param <ID> El tipo del identificador, debe ser Serializable.
  */
-public abstract class BaseEntity<ID extends Serializable> {
+public abstract class BaseEntity<ID extends Serializable> implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L; // Para versionado de serialización
+
     @Id
-    @Indexed(unique = true)
     private ID id;
 
-    @CreatedDate
-    private Date created;// fecha de creación, inmutable.
+    @CreatedDate // Gestionado por Spring Data Auditing
+    private LocalDateTime createdAt;
 
-    @LastModifiedDate
-    private Date updated;// fecha de la última modificación.
+    @LastModifiedDate // Gestionado por Spring Data Auditing
+    private LocalDateTime updatedAt;
 
     /**
-     * Constructor sin argumentos.
-     * Se define su fecha de creación.
+     * Constructor protegido sin argumentos para frameworks.
      */
-    public BaseEntity() {
+    protected BaseEntity() {}
+
+    // --- Métodos funcionales ---
+
+    protected void touch(){
+        this.updatedAt = LocalDateTime.now();
     }
+
+    // --- Métodos heredados ---
 
     @Override
     public int hashCode() {
@@ -39,41 +48,34 @@ public abstract class BaseEntity<ID extends Serializable> {
     @Override
     public boolean equals(Object obj) {
         if(this == obj) return true;
-        if(id == null || obj == null || getClass() != obj.getClass()) return false;
+        if(obj == null || getClass() != obj.getClass()) return false;
         BaseEntity<?> other = (BaseEntity<?>) obj;
-        return Objects.equals(id, other.id);
+        return this.id != null && Objects.equals(this.id, other.id);
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName() + "{" +
+                "entity=" + getClass().getSimpleName() +
                 "id=" + id +
-                ", created=" + created +
-                ", updated=" + updated +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
                 '}';
     }
+
+    // --- Getters ---
 
     public ID getId() {
         return id;
     }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    // --- Setters ---
 
     public void setId(ID id) {
-        this.id = id;
+        this.id = Objects.requireNonNull(id, "id is required");
     }
-
-    public Date getCreated() {
-        return created;
-    }
-
-    public void setCreated(Date created) {
-        this.created = created;
-    }
-
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = Objects.requireNonNull(createdAt, "createdAt is required"); }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = Objects.requireNonNull(updatedAt, "updatedAt is required"); }
 }
