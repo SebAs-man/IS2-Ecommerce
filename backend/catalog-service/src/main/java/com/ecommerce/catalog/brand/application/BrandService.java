@@ -7,7 +7,7 @@ import com.ecommerce.catalog.brand.domain.model.Brand;
 import com.ecommerce.catalog.brand.domain.repository.BrandRepository;
 import com.ecommerce.catalog.sharedkernel.application.DeleteService;
 import com.ecommerce.catalog.sharedkernel.application.ReadService;
-import com.ecommerce.catalog.sharedkernel.application.exceptions.ResourceNotFoundException;
+import com.ecommerce.catalog.sharedkernel.application.exception.ResourceNotFoundException;
 import com.ecommerce.catalog.sharedkernel.application.util.IdGenerator;
 import com.ecommerce.catalog.sharedkernel.domain.model.vo.NonBlankString;
 import org.slf4j.Logger;
@@ -90,8 +90,8 @@ public class BrandService implements ReadService<BrandResponseDTO, String>, Dele
      */
     @Transactional(readOnly = true)
     public Page<BrandResponseDTO> searchByName(String name, Pageable pageable) {
-        log.debug("Buscando marcas por nombre que contiene '{}', paginado: {}", name, pageable);
-        Page<Brand> brandPage = repository.findByNameContainingIgnoreCase(name, pageable);
+        log.debug("Buscando marcas por nombre que contengan '{}', paginado: {}", name, pageable);
+        Page<Brand> brandPage = repository.findByNameValueContainingIgnoreCase(name, pageable);
         return mapper.toBrandResponseDTOPage(brandPage);
     }
 
@@ -111,9 +111,12 @@ public class BrandService implements ReadService<BrandResponseDTO, String>, Dele
         if(repository.existsByNameValueIgnoreCase(normalizedName)){
             throw new DataIntegrityViolationException("There is already a brand with name: " + normalizedName);
         }
+        // Generar un identificador aleatorio
+        String id = IdGenerator.generateId();
+        log.debug("ID generado para nueva marca: {}", id);
         // Crear la entidad
         Brand brand = new Brand(
-                IdGenerator.generateId(), // Genera un id aleatorio.
+                id,
                 request.name(),
                 request.description(),
                 request.logoUrl()
@@ -121,7 +124,7 @@ public class BrandService implements ReadService<BrandResponseDTO, String>, Dele
         // Guardar la nueva instancia
         try {
             Brand savedBrand = repository.save(brand);
-            log.info("Marca creada con ID {}", savedBrand.getId());
+            log.info("Marca creada con ID {}", id);
             return mapper.toResponseDTO(savedBrand);
         } catch (DataIntegrityViolationException e){
             throw new IllegalArgumentException(
@@ -140,19 +143,18 @@ public class BrandService implements ReadService<BrandResponseDTO, String>, Dele
         log.info("Actualizando marca ID: {}", id);
         Brand brand = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Brand", "ID", id));
-
+        // Verificar si el nombre cambió y es único
         String originalName = brand.getName().value();
         String currentName = new NonBlankString(request.name()).value();
-        // Verifica si el nombre cambió y si es único
         if(!currentName.equalsIgnoreCase(originalName) &&
                 repository.existsByNameValueIgnoreCase(currentName)){
             throw new DataIntegrityViolationException("There is already a brand with name " + currentName);
         }
-
+        // Modificar la instancia
         brand.setName(request.name());
         brand.setDescription(request.description());
         brand.setLogoUrl(request.logoUrl());
-
+        // Guardar la instancia modificada
         try {
             Brand savedBrand = repository.save(brand);
             log.info("Marca actualizada con ID {}", savedBrand.getId());

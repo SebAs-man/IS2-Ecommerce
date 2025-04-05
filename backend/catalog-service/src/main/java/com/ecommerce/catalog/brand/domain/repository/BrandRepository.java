@@ -4,7 +4,6 @@ import com.ecommerce.catalog.brand.domain.model.Brand;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 
@@ -26,6 +25,5 @@ public interface BrandRepository extends MongoRepository<Brand, String> {
      * @param pageable información de paginación a aplicar a la consulta. Debe ser no nulo.
      * @return una lista paginada de marcas cuyos nombres contienen la subcadena especificada, ignorando mayúsculas y minúsculas.
      */
-    @Query("{ 'name.value' : { $regex: ?0, $options: 'i' } }")
-    Page<Brand> findByNameContainingIgnoreCase(String name, Pageable pageable);
+    Page<Brand> findByNameValueContainingIgnoreCase(String name, Pageable pageable);
 }

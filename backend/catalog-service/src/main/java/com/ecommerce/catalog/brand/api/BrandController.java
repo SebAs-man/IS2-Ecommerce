@@ -6,8 +6,6 @@ import com.ecommerce.catalog.brand.application.dto.response.BrandResponseDTO;
 import com.ecommerce.catalog.sharedkernel.api.DeleteController;
 import com.ecommerce.catalog.sharedkernel.api.ReadController;
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +14,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
+/**
+ * Controlador REST que gestiona las operaciones relacionadas con las marcas
+ * del catálogo, proporcionando los endpoints necesarios para crear, leer,
+ * actualizar y eliminar marcas. Este controlador también implementa funcionalidades
+ * específicas como la búsqueda de marcas por nombre.
+ */
 @RestController
 @RequestMapping("/brands")
 public class BrandController implements ReadController<BrandResponseDTO, String>, DeleteController<String> {

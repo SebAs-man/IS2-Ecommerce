@@ -32,7 +32,7 @@ public class Product extends BaseEntity<String> {
      * Constructor por defecto para la entidad Product.
      */
     public Product() {
-        super();
+        super("55");
         this.description = "";
         this.brandId = "";
         this.categoriesId = Collections.emptyList();

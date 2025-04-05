@@ -34,7 +34,7 @@ public class Variant extends BaseEntity<String> {
      * Constructor por defecto para la entidad Variant.
      */
     public Variant() {
-        super();
+        super("55");
         this.stock = 0;
         this.available = true;
         this.images = Collections.emptyList();

@@ -1,7 +1,7 @@
 package com.ecommerce.catalog.product.application.dto.response;
 
 import com.ecommerce.catalog.brand.application.dto.response.BrandResponseDTO;
-import com.ecommerce.catalog.category.application.dto.CategoryResponseDTO;
+import com.ecommerce.catalog.category.application.dto.response.CategoryResponseDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;

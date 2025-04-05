@@ -1,5 +1,7 @@
-package com.ecommerce.catalog.category.application.dto;
+package com.ecommerce.catalog.category.application.dto.response;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,9 +18,14 @@ import java.util.List;
  * - updatedAt: Fecha y hora de la última actualización de la categoría.
  */
 public record CategoryResponseDTO (
+        String id,
         String name,
         String description,
-        List<String> ancestors, // Mostrar la jerarquía
+        String parentId,
+        List<String> ancestors, // Mostrar la jerarquía completa
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-) {}
+) implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+}

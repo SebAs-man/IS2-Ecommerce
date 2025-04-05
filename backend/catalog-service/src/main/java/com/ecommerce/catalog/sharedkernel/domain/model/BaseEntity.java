@@ -29,7 +29,8 @@ public abstract class BaseEntity<ID extends Serializable> implements Serializabl
     private LocalDateTime updatedAt;
 
     /**
-     * Constructor protegido sin argumentos para frameworks.
+     * Constructor protegido sin argumentos.
+     * Es utilizado por Spring Boot para las solicitudes getting.
      */
     protected BaseEntity() {}
 

@@ -1,7 +1,8 @@
 package com.ecommerce.catalog.config;
 
+import com.ecommerce.catalog.category.domain.exception.CategoryNotEmptyException;
 import com.ecommerce.catalog.sharedkernel.application.dto.ErrorResponse;
-import com.ecommerce.catalog.sharedkernel.application.exceptions.ResourceNotFoundException;
+import com.ecommerce.catalog.sharedkernel.application.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -158,6 +159,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.warn("Error de validación de DTO [{}]: {}", getRequestPath(request), validationErrors);
         // Usamos handleExceptionInternal para encajar con la firma del método sobrescrito
         return handleExceptionInternal(ex, errorResponse, headers, HttpStatus.BAD_REQUEST, request);
+    }
+
+    /**
+     * Maneja {@code CategoryNotEmptyException} devolviendo una respuesta JSON estandarizada
+     * con detalles del error y un estado de Conflicto HTTP 409.
+     * @param ex la excepción lanzada al intentar borrar una categoría que contiene subcategorías.
+     * @param request la petición web actual durante la cual se produjo la excepción.
+     * @return  una {@code ResponseEntity} que contiene una {@code ErrorResponse} con los detalles del error,
+     * incluyendo el estado HTTP, el mensaje de error y la ruta de la petición.
+     */
+    @ExceptionHandler(CategoryNotEmptyException.class)
+    public ResponseEntity<ErrorResponse> handleCategoryNotEmpty(
+            CategoryNotEmptyException ex, WebRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Business Rule Violation",
+                ex.getMessage(),
+                getRequestPath(request)
+        );
+        log.warn("Conflicto al eliminar categoría [{}]: {}", getRequestPath(request), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
     /**

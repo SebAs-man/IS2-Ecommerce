@@ -1,4 +1,4 @@
-package com.ecommerce.catalog.sharedkernel.application.exceptions;
+package com.ecommerce.catalog.sharedkernel.application.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
