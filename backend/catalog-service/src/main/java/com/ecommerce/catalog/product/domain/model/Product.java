@@ -52,7 +52,6 @@ public class Product extends BaseEntity<String> {
         NonBlankString availableKey = new NonBlankString(key);
         NonBlankString availableValue = new NonBlankString(value);
         this.staticAttributes.put(availableKey, availableValue);
-        touch();
     }
 
     /**
@@ -63,7 +62,6 @@ public class Product extends BaseEntity<String> {
     public void removeStaticAttribute(String key) {
         NonBlankString availableKey = new NonBlankString(key);
         if(this.staticAttributes.remove(availableKey) != null){
-            touch();
         }
     }
 
@@ -76,7 +74,6 @@ public class Product extends BaseEntity<String> {
         NonBlankString availableCategoryId = new NonBlankString(categoryId);
          if (!this.categoriesId.contains(availableCategoryId)) {
              this.categoriesId.add(availableCategoryId);
-             touch();
          }
     }
 
@@ -88,7 +85,6 @@ public class Product extends BaseEntity<String> {
     public void removeFromCategory(String categoryId) {
         NonBlankString availableCategoryId = new NonBlankString(categoryId);
         if(this.categoriesId.remove(availableCategoryId)){
-            touch();
         }
     }
 

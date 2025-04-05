@@ -2,7 +2,6 @@ package com.ecommerce.catalog.brand.domain.model;
 
 import com.ecommerce.catalog.sharedkernel.domain.model.BaseEntity;
 import com.ecommerce.catalog.sharedkernel.domain.model.vo.NonBlankString;
-import org.springframework.data.mongodb.core.annotation.Collation;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -28,13 +27,13 @@ public class Brand extends BaseEntity<String> {
 
     /**
      * Construye un nuevo objeto Brand con los parámetros especificados.
-     *
+     * @param id el identificador único de la marca, no puede ser nula ni estar vacía
      * @param name el nombre de la marca, debe estar en blanco
      * @param description una breve descripción de la marca, puede estar vacía pero no ser nula
      * @param logoUrl la URL del logo de la marca, puede estar vacía pero no ser nula
      */
-    public Brand(String name, String description, String logoUrl) {
-        super();
+    public Brand(String id, String name, String description, String logoUrl) {
+        super(id);
         setName(name);
         setDescription(description);
         setLogoUrl(logoUrl);
@@ -49,6 +48,6 @@ public class Brand extends BaseEntity<String> {
     // --- Setters ---
 
     public void setName(String name) { this.name = new NonBlankString(name); }
-    public void setDescription(String description) { this.description = description == null ? null : description.trim(); }
-    public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl == null ? null : logoUrl.trim(); }
+    public void setDescription(String description) { this.description = description == null || description.isBlank() ? null : description.trim(); }
+    public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl == null || logoUrl.isBlank() ? null : logoUrl.trim(); }
 }

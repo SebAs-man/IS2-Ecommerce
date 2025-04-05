@@ -8,6 +8,7 @@ import com.ecommerce.catalog.brand.domain.repository.BrandRepository;
 import com.ecommerce.catalog.sharedkernel.application.DeleteService;
 import com.ecommerce.catalog.sharedkernel.application.ReadService;
 import com.ecommerce.catalog.sharedkernel.application.exceptions.ResourceNotFoundException;
+import com.ecommerce.catalog.sharedkernel.application.util.IdGenerator;
 import com.ecommerce.catalog.sharedkernel.domain.model.vo.NonBlankString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,6 +113,7 @@ public class BrandService implements ReadService<BrandResponseDTO, String>, Dele
         }
         // Crear la entidad
         Brand brand = new Brand(
+                IdGenerator.generateId(), // Genera un id aleatorio.
                 request.name(),
                 request.description(),
                 request.logoUrl()

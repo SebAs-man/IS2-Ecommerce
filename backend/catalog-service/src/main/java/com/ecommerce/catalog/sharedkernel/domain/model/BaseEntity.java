@@ -3,6 +3,7 @@ package com.ecommerce.catalog.sharedkernel.domain.model;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.domain.Persistable;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -10,11 +11,11 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
- * Clase base abstracta para entidades persistentes dentro del microservicio de Catálogo.
- * Proporciona un ID y campos de auditoría básicos (fechas de creación/modificación).
- * @param <ID> El tipo del identificador, debe ser Serializable.
+ * Representa una entidad base con propiedades y comportamientos comunes para objetos de dominio.
+ * Esta clase está pensada para ser extendida por implementaciones de entidades concretas.
+ * @param <ID> el tipo del identificador de la entidad, que debe extender Serializable.
  */
-public abstract class BaseEntity<ID extends Serializable> implements Serializable {
+public abstract class BaseEntity<ID extends Serializable> implements Serializable, Persistable<ID> {
     @Serial
     private static final long serialVersionUID = 1L; // Para versionado de serialización
 
@@ -32,13 +33,25 @@ public abstract class BaseEntity<ID extends Serializable> implements Serializabl
      */
     protected BaseEntity() {}
 
-    // --- Métodos funcionales ---
-
-    protected void touch(){
-        this.updatedAt = LocalDateTime.now();
+    /**
+     * Constructor protegido con un identificador predeterminado.
+     * @param id el identificador único de la entidad.
+     */
+    protected BaseEntity(ID id) {
+        setId(id);
     }
 
     // --- Métodos heredados ---
+
+    /**
+     * Indica explícitamente a Spring Data si esta instancia es nueva.
+     * Es nueva si la fecha de creación (gestionada por @CreatedDate) aún no ha sido asignada.
+     * @return true si createdAt es null, false en caso contrario.
+     */
+    @Override
+    public boolean isNew() {
+        return this.createdAt == null;
+    }
 
     @Override
     public int hashCode() {
@@ -65,17 +78,12 @@ public abstract class BaseEntity<ID extends Serializable> implements Serializabl
 
     // --- Getters ---
 
-    public ID getId() {
-        return id;
-    }
+    @Override
+    public ID getId() { return id; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 
     // --- Setters ---
 
-    public void setId(ID id) {
-        this.id = Objects.requireNonNull(id, "id is required");
-    }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = Objects.requireNonNull(createdAt, "createdAt is required"); }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = Objects.requireNonNull(updatedAt, "updatedAt is required"); }
+    public void setId(ID id) { this.id = Objects.requireNonNull(id, "id is required"); }
 }

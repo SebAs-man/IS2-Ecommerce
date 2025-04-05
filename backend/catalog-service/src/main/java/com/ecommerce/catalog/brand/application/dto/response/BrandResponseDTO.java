@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
  * - updatedAt: Fecha y hora de la última actualización de la marca.
  */
 public record BrandResponseDTO(
+        String id,
         String name,
         String description,
         String logoUrl,
