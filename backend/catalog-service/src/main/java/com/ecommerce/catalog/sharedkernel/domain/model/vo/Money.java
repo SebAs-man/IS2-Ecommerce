@@ -71,6 +71,26 @@ public record Money(BigDecimal amount, Currency currency) implements Serializabl
         return new Money(this.amount.subtract(other.amount), this.currency);
     }
 
+    /**
+     * Multiplica la cantidad monetaria por un multiplicador entero especificado.
+     * @param multiplier: el valor entero por el que se multiplicará la cantidad monetaria.
+     * @return una nueva instancia de {@code Money} que contiene el resultado de la multiplicación,
+     * con la misma moneda que la instancia original.
+     */
+    public Money multiply(int multiplier) {
+        return new Money(this.amount.multiply(BigDecimal.valueOf(multiplier)), this.currency);
+    }
+
+    /**
+     * Multiplica la cantidad monetaria con un multiplicador {@code BigDecimal} especificado.
+     * @param multiplier el valor {@code BigDecimal} por el que se multiplicará la cantidad monetaria.
+     * @return una nueva instancia de {@code Money} que contiene el resultado de la multiplicación,
+     * con la misma moneda que la instancia original.
+     */
+    public Money multiply(BigDecimal multiplier) {
+        return new Money(this.amount.multiply(multiplier), this.currency);
+    }
+
     // --- Métodos comparables ---
 
     /**
@@ -121,6 +141,7 @@ public record Money(BigDecimal amount, Currency currency) implements Serializabl
                             + this.currency + " and " + other.currency);
         }
     }
+
 
 
     // --- Métodos heredados ---

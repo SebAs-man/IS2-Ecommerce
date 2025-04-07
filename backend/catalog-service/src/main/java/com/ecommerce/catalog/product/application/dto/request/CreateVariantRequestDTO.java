@@ -1,17 +1,17 @@
 package com.ecommerce.catalog.product.application.dto.request;
 
+import com.ecommerce.catalog.sharedkernel.application.dto.MoneyDTO;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
-import java.math.BigDecimal;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Objeto de transferencia de datos (DTO) que representa una solicitud para crear o actualizar una variante de producto.
- * Encapsula detalles clave sobre la variante de producto, incluyendo su SKU, precio, nivel de stock, imágenes y atributos.
- *
- * @param sku Unidad de mantenimiento de existencias (SKU) de la variante.
- * Debe ser una cadena no en blanco con una longitud entre 3 y 50 caracteres.
+ * Objeto de transferencia de datos (DTO) que representa una solicitud para crear una variante de producto.
+ * Encapsula detalles clave sobre la variante de producto, incluyendo su precio, nivel de stock, imágenes y atributos.
  * @param price Precio de la variante.
  * Debe ser un valor no nulo, y debe ser un número positivo o cero.
  * @param stock Cantidad en stock de la variante.
@@ -22,11 +22,19 @@ import java.util.Map;
  * donde la clave representa el nombre del atributo y el valor representa los datos del atributo.
  * Los atributos añaden contexto y características personalizadas a la variante.
  */
-public record VariantRequestDTO(
-        @NotBlank @Size(min = 3, max = 50) String sku,
-        @NotNull @PositiveOrZero BigDecimal price,
-        @PositiveOrZero Integer stock,
+public record CreateVariantRequestDTO(
+        @NotNull(message = "Price cannot be null.")
+        @Valid
+        MoneyDTO price,
+
+        @NotNull(message = "Stock cannot be null.")
+        @PositiveOrZero(message = "Stock cannot be less to zero.")
+        Integer stock,
+
         List<String> images,
-        @NotEmpty Map<String, Object> attributes
-) {
+
+        Map<String, Object> attributes
+) implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 }

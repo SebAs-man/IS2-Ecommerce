@@ -18,7 +18,7 @@ import java.util.Map;
  * @param validationErrors Mapa detallado de errores de validación por campo (solo para errores 400 de validación).
  */
 @JsonInclude(JsonInclude.Include.NON_NULL) // No incluir campos nulos en el JSON (ej: validationErrors)
-public record ErrorResponse(
+public record ErrorResponseDTO(
         LocalDateTime timestamp,
         int status,
         String error, // Ej: "Not Found", "Bad Request"
@@ -36,7 +36,7 @@ public record ErrorResponse(
      * @param message Mensaje de error específico que proporciona contexto adicional.
      * @param path Ruta URI de la petición que causó el error.
      */
-    public ErrorResponse(int status, String error, String message, String path) {
+    public ErrorResponseDTO(int status, String error, String message, String path) {
         this(LocalDateTime.now(), status, error, message, path, null);
     }
 
@@ -50,7 +50,7 @@ public record ErrorResponse(
      * @param path Ruta URI de la petición que causó el error.
      * @param validationErrors Mapa que contiene errores de validación específicos de cada campo.
      */
-    public ErrorResponse(int status, String error, String message, String path, Map<String, List<String>> validationErrors) {
+    public ErrorResponseDTO(int status, String error, String message, String path, Map<String, List<String>> validationErrors) {
         this(LocalDateTime.now(), status, error, message, path, validationErrors);
     }
 }

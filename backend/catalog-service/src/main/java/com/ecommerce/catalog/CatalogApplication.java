@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * La clase CatalogApplication sirve como punto de entrada para la aplicación.

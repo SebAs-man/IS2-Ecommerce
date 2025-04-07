@@ -85,7 +85,6 @@ public class CategoryService implements ReadService<CategoryResponseDTO, String>
 
     /**
      * Busca categorías por nombre y devuelve un resultado paginado.
-     *
      * @param name el nombre de la categoría o parte del nombre para filtrar los resultados.
      * @param pageable la información de paginación y ordenación.
      * @return una página de categorías que coinciden con el nombre especificado, encapsulada en objetos CategoryResponseDTO.
@@ -118,7 +117,7 @@ public class CategoryService implements ReadService<CategoryResponseDTO, String>
      * determina los ancestros si se proporciona un ID de categoría principal,
      * genera un identificador único para la categoría y almacena la nueva categoría
      * de forma persistente en el repositorio.
-     * @param request el objeto de transferencia de datos que contiene la información necesaria para crear una nueva categoría, incluyendo nombre, descripción e ID de categoría principal opcional.
+     * @param request el objeto de transferencia de datos que contiene la información necesaria para crear una nueva categoría.
      * @return un {@code CategoryResponseDTO} con los detalles de la categoría recién guardada.
      */
     @Transactional
@@ -133,7 +132,7 @@ public class CategoryService implements ReadService<CategoryResponseDTO, String>
         List<String> ancestors = new ArrayList<>();
         String parentId = request.parentId();
         if(parentId != null && !parentId.isBlank()){
-           Category parent = repository.findAncestorsById(parentId)
+           Category parent = repository.findAncestorsOnlyById(parentId)
                    .orElseThrow(() -> new ResourceNotFoundException("Category", "ID", parentId));
            ancestors.addAll(parent.getAncestors());
         }
@@ -145,7 +144,7 @@ public class CategoryService implements ReadService<CategoryResponseDTO, String>
                 id,
                 request.name(),
                 request.description(),
-                parentId,
+                request.parentId(),
                 ancestors
         );
         // Guardar la nueva instancia

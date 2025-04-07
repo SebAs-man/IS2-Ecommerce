@@ -1,7 +1,8 @@
 package com.ecommerce.catalog.config;
 
 import com.ecommerce.catalog.category.domain.exception.CategoryNotEmptyException;
-import com.ecommerce.catalog.sharedkernel.application.dto.ErrorResponse;
+import com.ecommerce.catalog.product.application.exception.InvalidVariantAttributesException;
+import com.ecommerce.catalog.sharedkernel.application.dto.ErrorResponseDTO;
 import com.ecommerce.catalog.sharedkernel.application.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +48,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @return  una {@code ResponseEntity} que contiene una {@code ErrorResponse} con los detalles del error.
      */
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
+    public ResponseEntity<ErrorResponseDTO> handleResourceNotFoundException(
             ResourceNotFoundException ex, WebRequest request) {
 
-        ErrorResponse errorResponse = new ErrorResponse(
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(
                 HttpStatus.NOT_FOUND.value(),
                 HttpStatus.NOT_FOUND.getReasonPhrase(),
                 ex.getMessage(), // Mensaje específico de la excepción
@@ -68,10 +69,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @return  una {@code ResponseEntity} que contiene una {@code ErrorResponse} con los detalles del error.
      */
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentAndState(
+    public ResponseEntity<ErrorResponseDTO> handleIllegalArgumentAndState(
             RuntimeException ex, WebRequest request) {
 
-        ErrorResponse errorResponse = new ErrorResponse(
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
                 ex.getMessage(), // Expone el mensaje de validación/error de negocio
@@ -90,13 +91,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @return  una {@code ResponseEntity} que contiene una {@code ErrorResponse} con los detalles del error.
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+    public ResponseEntity<ErrorResponseDTO> handleDataIntegrityViolation(
             DataIntegrityViolationException ex, WebRequest request) {
 
         // Podrías inspeccionar ex.getCause() para ver si es específicamente una DuplicateKeyException
         // y dar un mensaje más preciso, pero un 409 genérico suele ser suficiente.
         String specificMessage = CONFLICT_MSG + " Es posible que un identificador único ya exista.";
-        ErrorResponse errorResponse = new ErrorResponse(
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(
                 HttpStatus.CONFLICT.value(),
                 HttpStatus.CONFLICT.getReasonPhrase(),
                 specificMessage,
@@ -114,10 +115,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @return  una {@code ResponseEntity} que contiene una {@code ErrorResponse} con los detalles del error.
      */
     @ExceptionHandler(OptimisticLockingFailureException.class)
-    public ResponseEntity<ErrorResponse> handleOptimisticLockingFailure(
+    public ResponseEntity<ErrorResponseDTO> handleOptimisticLockingFailure(
             OptimisticLockingFailureException ex, WebRequest request) {
 
-        ErrorResponse errorResponse = new ErrorResponse(
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(
                 HttpStatus.CONFLICT.value(),
                 HttpStatus.CONFLICT.getReasonPhrase(),
                 OPTIMISTIC_LOCK_MSG, // Mensaje específico para el usuario
@@ -149,7 +150,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             validationErrors.computeIfAbsent(fieldName, k -> new ArrayList<>()).add(errorMessage);
         });
 
-        ErrorResponse errorResponse = new ErrorResponse(
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation Error",
                 VALIDATION_ERROR_MSG,
@@ -170,10 +171,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * incluyendo el estado HTTP, el mensaje de error y la ruta de la petición.
      */
     @ExceptionHandler(CategoryNotEmptyException.class)
-    public ResponseEntity<ErrorResponse> handleCategoryNotEmpty(
+    public ResponseEntity<ErrorResponseDTO> handleCategoryNotEmpty(
             CategoryNotEmptyException ex, WebRequest request) {
 
-        ErrorResponse errorResponse = new ErrorResponse(
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(
                 HttpStatus.CONFLICT.value(),
                 "Business Rule Violation",
                 ex.getMessage(),
@@ -181,6 +182,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         );
         log.warn("Conflicto al eliminar categoría [{}]: {}", getRequestPath(request), ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
+    /**
+     * Maneja InvalidVariantAttributesException (400 Bad Request).
+     * Ocurre cuando los atributos proporcionados para crear/actualizar una variante
+     * no cumplen con el schema definido en el producto padre (ej.: falta requerido,
+     * clave inválida, tipo de valor incorrecto).
+     */
+    @ExceptionHandler(InvalidVariantAttributesException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidVariantAttributes(
+            InvalidVariantAttributesException ex, WebRequest request) {
+        // Usamos el mensaje detallado de la excepción que lanzamos en el servicio
+        String errorMessage = ex.getMessage();
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(
+                HttpStatus.BAD_REQUEST.value(),
+                "Invalid Variant Attributes", // Un error descriptivo corto
+                errorMessage,
+                getRequestPath(request)
+        );
+        // Logueamos como WARN porque es un error del cliente al formar la petición
+        log.warn("Atributos de variante inválidos [{}]: {}", getRequestPath(request), errorMessage);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -192,11 +215,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * incluyendo el código de estado, el mensaje de error y la ruta de la petición.
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGlobalException(
+    public ResponseEntity<ErrorResponseDTO> handleGlobalException(
             Exception ex, WebRequest request) {
         log.error("Error inesperado [{}]: {}", getRequestPath(request), ex.getMessage(), ex);
-
-        ErrorResponse errorResponse = new ErrorResponse(
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
                 INTERNAL_ERROR_MSG, // Mensaje genérico para el cliente

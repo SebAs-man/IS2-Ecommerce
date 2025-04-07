@@ -1,60 +1,116 @@
-# Backend Microservices (E-commerce IS2)
+# Backend - Microservicios del Proyecto E-commerce (IS2)
 
-Este directorio contiene todos los microservicios que componen el backend de la plataforma de e-commerce.
+Este directorio alberga el código fuente de todos los microservicios que componen el backend de la plataforma E-commerce.
 
-Consulta el [README Principal](../../README.md) para una visión general del proyecto completo, prerrequisitos globales y estrategia de ramificación.
+Para una visión general del proyecto completo (incluyendo frontend), prerrequisitos globales, estructura del monorepo y estrategia de ramificación, por favor consulta el [**README Principal**](../README.md) en la raíz del repositorio.
 
-## Arquitectura y Patrones Comunes
+## 1. Arquitectura Backend
 
-El backend sigue una arquitectura de microservicios implementada con Spring Boot. Cada microservicio dentro de este directorio (`catalog-service`, `cart-service`, etc.) sigue, en general, los siguientes patrones:
+El backend sigue una **arquitectura de microservicios**, donde cada servicio se enfoca en una capacidad de negocio delimitada (Bounded Context de DDD). Los servicios están diseñados para ser desplegados y escalados independientemente.
 
-* **Estructura por Funcionalidad (Feature-based):** Dentro de cada microservicio, el código se organiza en paquetes por capacidad de negocio (ej: `product`, `category` dentro de `catalog-service`).
-* **Capas Arquitectónicas (Dentro de cada Feature/Servicio):**
-    * `api`: Controladores REST (`@RestController`) y exposición de la API. Define el contrato HTTP.
-    * `application`: Orquestación de casos de uso (`@Service`), DTOs (se usan `records` Java), Mappers (MapStruct). Lógica de aplicación, validación de entrada DTO, transacciones.
-    * `domain`: El núcleo del negocio. Entidades (`@Document`), Value Objects (`record` o clases inmutables), constantes/enums, *interfaces* de Repositorio, excepciones de dominio, lógica de negocio fundamental.
-    * `infrastructure`: Implementaciones técnicas. Configuración de persistencia específica, clientes para otros servicios, etc. (Con Spring Data, la implementación del repositorio es a menudo implícita).
-    * `config`: Configuración global del microservicio (Beans, Seguridad, Excepciones Globales, Auditoría).
-    * `sharedkernel`: Componentes (clases base, VOs, DTOs comunes como `ErrorResponse`, excepciones) compartidos *dentro* del mismo microservicio entre sus features. *(NO confundir con librerías compartidas entre microservicios, que irían en `/libs`)*.
-* **Principios DDD Ligeros:** Uso de Entidades, Value Objects, separación clara entre capas.
-* **API RESTful:** Exposición de funcionalidades mediante JSON sobre HTTP.
-* **Manejo de Errores:** Uso de `GlobalExceptionHandler` (`@RestControllerAdvice`) para respuestas de error consistentes.
-* **Validación:** Anotaciones de Jakarta Bean Validation en DTOs de Request, validaciones de dominio en entidades/VOs/servicios.
-* **Persistencia:** Spring Data (MongoDB, Redis según el servicio).
+El stack tecnológico principal es **Java 17+** y **Spring Boot 3+**, utilizando **Maven** como gestor de dependencias y build.
 
-## Stack Tecnológico Común (Backend)
+## 2. Patrones Arquitectónicos y de Diseño Comunes
 
-* Java 17+
-* Spring Boot 3+
-* Spring Web MVC / WebFlux (según el servicio)
-* Spring Data MongoDB / Redis
-* Maven (Gestor de dependencias y build)
-* MapStruct (Mapeo Objeto-DTO)
-* SLF4J + Logback (Logging)
-* JUnit 5, Mockito, Testcontainers (Testing)
+Con el objetivo de lograr consistencia, mantenibilidad, testabilidad y escalabilidad, los microservicios dentro de este directorio siguen (o deberían seguir) los siguientes patrones y convenciones:
 
-## Comunicación Inter-Servicios
+### 2.1. Estructura Interna del Microservicio
 
-La comunicación entre microservicios se realiza principalmente mediante:
+Cada microservicio adopta una combinación de **organización por funcionalidad (feature-based)** y **arquitectura por capas**, alineada con los principios de **Arquitectura Hexagonal (Puertos y Adaptadores)** y **Domain-Driven Design (DDD)**:
 
-* **Llamadas REST Síncronas:** (Usando `RestTemplate` o `WebClient`) para consultas directas.
-* **Mensajería Asíncrona (RabbitMQ):** Para publicar/consumir eventos de dominio entre servicios (ej: `ProductoCreado`, `StockActualizado`).
+```text
+backend/micro-service
+├── pom.xml                     # Build (Maven)
+├── README.md                   # README específico del servicio
+└── src/
+    ├── main/
+    │   ├── java/
+    │   │   └── com/ecommerce/micro-service/  # Paquete base del servicio
+    │   │       ├── {feature1}/                
+    │   │       │   ├── api/                      # ADAPTADOR: Driving (Web/REST) -> Entrada
+    │   │       │   │   └── ProductController.java
+    │   │       │   ├── application/              # CORE: Lógica de Aplicación/Casos de Uso
+    │   │       │   │   ├── dto/                  # DTOs (Request/Response) para este feature
+    │   │       │   │   ├── mapper/               # Mappers (MapStruct) para este feature
+    │	│	│   │	├── exception/		  # Excepciones de aplicación específicas		
+    │   │       │   │   └── ProductService.java   # Servicio de aplicación (orquesta)
+    │   │       │   ├── domain/                   # CORE: Lógica y Modelo de Dominio
+    │   │       │   │   ├── constant/             # Enums/class específicos
+    │   │       │   │   ├── exception/            # Excepciones de dominio específicas
+    │   │       │   │   ├── model/                # Entidades, VO's, etc.
+    │   │       │   │   └── repository/           # INTERFACES de Repositorio <-- PUERTOS
+    │   │       │   └── infrastructure/           # ADAPTADORES: Driven (Persistencia, etc) -> Salida
+    │   │       │       ├── persistence/          # Implementación Repos (si es custom), Config específica BD
+    │   │       │       └── client/               # Clientes para otros servicios si este feature los necesita
+    │   │       ├── {feature2}/                 
+    │   │       │   └── ...
+    │   │       ├── {feature3}/                 
+    │   │       │   └── ...
+    │   │       ├── sharedkernel/                 # Componentes compartidos DENTRO de este servicio
+    │   │       │   ├── application/              # DTOs comunes, Utils aplicados
+    │   │       │   ├── domain/                   # Modelos/VOs comunes, Exceptions comunes, Utils dominio
+    │   │       │   └── infrastructure/           # Configuración/Helpers infra compartidos (raro)
+    │   │       ├── config/                       # Configuración global del servicio
+    │   │       │   ├── GlobalExceptionHandler.java
+    │   │       │   ├── ApplicationConfig.java    # (Otros beans globales)
+    │   │       │   ├── AuditingConfig.java       # (@EnableMongoAuditing)
+    │   │       │   └── ...
+    │   │       └── CatalogServiceApplication.java  # Main class (@SpringBootApplication, @Enable...Repositories)
+    │   └── resources/
+    │       └── application.properties		 # Configuración externa
+    └── test/
+        └── java/                              # Pruebas (con estructura paralela)                              # Pruebas (Unitarias, Integración)
+```
 
-Un **API Gateway (Kong)** actúa como punto de entrada único para las peticiones externas (frontends, apps móviles).
+* ```domain/```: Contiene el modelo y la lógica de negocio fundamental, independiente de la tecnología externa. Define los contratos para la persistencia (interfaces de Repositorio). Es el corazón.
+* ```application/```: Orquesta los casos de uso, usa los repositorios (a través de interfaces), maneja DTOs y mappers, gestiona transacciones. Es el director de orquesta.
+* ```api/```: Expone los casos de uso como una API REST. Recibe peticiones HTTP, valida DTOs de entrada, llama a los servicios de aplicación y devuelve respuestas HTTP (ResponseEntity). Es la puerta de entrada web.
+* ```infrastructure/```: Contiene la implementación técnica que interactúa con el exterior (bases de datos, otros servicios, colas de mensajes). Implementa las interfaces definidas en el dominio. Son los enchufes al mundo real.
+* ```config/```: Configuración global de Spring para el servicio.
+* ```sharedkernel/```: Para reutilizar código (VOs, DTOs base, excepciones comunes) entre las diferentes features de un mismo microservicio.
 
-## Configuración y Ejecución General
+### 2.2. Principios Adicionales
 
-* Cada microservicio tiene su propio archivo `application.properties` (o `.yml`) dentro de su directorio `src/main/resources`.
-* Es **crucial** configurar correctamente las **conexiones a bases de datos** (MongoDB URI, Redis Host/Port) y el **puerto del servidor (`server.port`)** para cada servicio para evitar conflictos al ejecutar localmente.
-* Se recomienda usar **Docker y Docker Compose** para levantar las bases de datos (Mongo, Redis), RabbitMQ y Kong localmente de forma sencilla. (Un archivo `docker-compose.yml` en la raíz del monorepo o en `backend/` sería ideal).
+* Value Objects (VOs): Se utilizan VOs (preferiblemente records Java) para encapsular tipos de datos primitivos con validaciones o lógica asociada (ej: NonBlankString, Money, NonNegativeInteger).
+* DTOs con Records: Se usan records Java para los DTOs (Request/Response) por su concisión e inmutabilidad.
+* Mapeo con MapStruct: Se utiliza MapStruct para generar código de mapeo eficiente entre entidades de dominio y DTOs. Se favorece un mapper común (CommonValueObjectMapper) para conversiones reutilizables (VO <-> Tipo Primitivo/DTO).
+* Manejo de Excepciones: Cada servicio incluye un GlobalExceptionHandler (@RestControllerAdvice) para centralizar el mapeo de excepciones a respuestas HTTP estandarizadas (ErrorResponse DTO).
+* Auditoría: Se utiliza Spring Data Auditing (@CreatedDate, @LastModifiedDate con LocalDateTime) en una BaseEntity (definida dentro de cada servicio, no compartida entre servicios).
+* IDs: Se generan IDs únicos (String, usando ULID) en la capa de servicio antes de crear las entidades.
+* Inyección de Dependencias: Se prefiere la inyección por constructor.
+* Logging: Se utiliza SLF4J + Logback para el registro de eventos.
 
-Consulta el `README.md` específico de cada microservicio para instrucciones detalladas de configuración y ejecución.
+## 3. Stack Tecnológico Común
+* Lenguaje: Java 17+
+* Framework: Spring Boot 3+
+* Persistencia: Spring Data MongoDB, Spring Data Redis (según necesidad del servicio)
+* Build: Maven
+* API: Spring Web MVC (REST Controllers)
+* Mensajería: Spring AMQP (RabbitMQ)
+* API Gateway: Kong (Gestiona el tráfico externo hacia los servicios)
+* Mapeo: MapStruct
+* Validación: Jakarta Bean Validation
+* Testing: JUnit 5, Mockito, AssertJ, Testcontainers
 
-## Microservicios Backend
+## 4. Comunicación Inter-Servicios
 
-* [**catalog-service/**](./catalog-service/README.md): Gestiona productos, variantes, categorías, marcas.
-* [**cart-service/**](./cart-service/README.md): Gestiona los carritos de compra de los usuarios. (Pendiente)
-* [**security-service/**](./security-service/README.md): Gestiona autenticación y autorización. (Pendiente)
-* [**discount-service/**](./discount-service/README.md): Gestiona descuentos y promociones. (Pendiente)
-* [**order-service/**](./order-service/README.md): Gestiona el proceso de pedidos. (Pendiente)
-* *(Añadir otros si existen)*
+* Asíncrona (Preferida para Eventos): RabbitMQ (usando Spring AMQP). Para notificar cambios de estado o eventos de dominio.
+* Síncrona (Para Consultas): Llamadas REST (usando RestTemplate o WebClient de Spring) entre servicios cuando se requiere una respuesta inmediata.
+
+## 5. Configuración y Ejecución
+
+* Cada servicio define su puerto (server.port) y nombre (spring.application.name) en su application.properties.
+* Las URIs de conexión a bases de datos (MongoDB, Redis) y brokers (RabbitMQ) también se configuran allí.
+* Se recomienda encarecidamente usar Docker Compose para levantar las dependencias de infraestructura (Mongo, Redis, RabbitMQ, Kong) localmente durante el desarrollo. (Sería ideal tener un docker-compose.yml en la raíz o en backend/).
+* Para ejecutar un servicio específico, navega a su directorio y utiliza los comandos de Maven o ejecútalo desde tu IDE (consulta el README de cada servicio).
+
+## 6. Lista de Microservicios Backend
+
+* ```catalog-service/```: Gestiona Productos, Variantes, Categorías, Marcas.
+* ```cart-service/```: Gestiona Carritos de Compra (Usa Redis).
+* ```security-service/```: Gestiona Autenticación y Autorización. (Implementación Pendiente)
+* ```discount-service/```: Gestiona Descuentos. (Implementación Pendiente)
+* ```order-service/```: Gestiona Pedidos. (Implementación Pendiente)
+(Añadir/quitar según los servicios reales del proyecto)
+
+

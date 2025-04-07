@@ -1,30 +1,29 @@
 package com.ecommerce.catalog.product.domain.model;
 
 import com.ecommerce.catalog.sharedkernel.domain.model.BaseEntity;
+import com.ecommerce.catalog.sharedkernel.domain.model.vo.Money;
 import com.ecommerce.catalog.sharedkernel.domain.model.vo.NonBlankString;
+import com.ecommerce.catalog.sharedkernel.domain.model.vo.NonNegativeInteger;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serial;
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Entidad que representa una variante específica y vendible de un producto.
  */
 @Document(collection = "variants")
 public class Variant extends BaseEntity<String> {
-    @Serial private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 1L;
     // --- Atributos básicos ---
-    @Indexed private String productId; // Id del producto padre.
-    @Indexed(unique = true) private String sku;
-    private BigDecimal price;
-    private Integer stock;
-    private Boolean available; // Calculado desde stock.
+    @Indexed private NonBlankString productId;
+    private Money price;
+    private NonNegativeInteger stock;
+    private Boolean available;
     private List<String> images;
     private Map<String, Object> attributes;
     // --- Atributos adicionales ---
@@ -33,20 +32,33 @@ public class Variant extends BaseEntity<String> {
     /**
      * Constructor por defecto para la entidad Variant.
      */
-    public Variant() {
-        super("55");
-        this.stock = 0;
-        this.available = true;
-        this.images = Collections.emptyList();
-        this.attributes = Collections.emptyMap();
+    public Variant() { super(); }
+
+    /**
+     * Constructor que inicializa una nueva instancia de una variante con parámetros predefinidos.
+     * @param id identificador único de la variante
+     * @param productId identificador del producto al que pertenece
+     * @param price precio monetario de la variante
+     * @param stock cantidad en inventario o disponibilidad de la variante
+     * @param images lista de imágenes únicas de la variante
+     * @param attributes atributos predefinidos por la variante, si es necesario.
+     */
+    public Variant(String id, String productId, Money price, Integer stock,
+                   List<String> images, Map<String, Object> attributes) {
+        super(id);
+        setProductId(productId);
+        setPrice(price);
+        setStock(stock);
+        setImages(images);
+        setAttributes(attributes);
+        setAvailable(true);
     }
 
     // --- Getters ---
 
-    public String getProductId() { return productId; }
-    public String getSku() { return sku; }
-    public BigDecimal getPrice() { return price; }
-    public Integer getStock() { return stock; }
+    public NonBlankString getProductId() { return productId; }
+    public Money getPrice() { return price; }
+    public NonNegativeInteger getStock() { return stock; }
     public Boolean getAvailable() { return available; }
     public List<String> getImages() { return Collections.unmodifiableList(images); }
     public Map<String, Object> getAttributes() { return Collections.unmodifiableMap(attributes); }
@@ -54,17 +66,11 @@ public class Variant extends BaseEntity<String> {
 
     // --- Setters ---
 
-    public void setProductId(String productId) { this.productId = productId; }
-    public void setSku(String sku) { this.sku = sku; }
-    public void setPrice(BigDecimal price) {
-        Objects.requireNonNull(price, "Price cannot be null");
-        if(price.compareTo(BigDecimal.ZERO) < 0){
-            throw new IllegalArgumentException("Price cannot be negative");
-        }
-        this.price = price;
-    }
-    public void setStock(Integer stock) { this.stock = stock == null || stock < 0 ? 0 : stock; }
-    public void setAvailable(Boolean available) { this.available = available == null || available; }
-    public void setImages(List<String> images) { this.images = images == null ? Collections.emptyList() : List.copyOf(images); }
-    public void setAttributes(Map<String, Object> attributes) { this.attributes = attributes == null ? Collections.emptyMap() : Map.copyOf(attributes); }
+    public void setPrice(Money price) { this.price = Objects.requireNonNull(price, "Price cannot be null"); }
+    public void setStock(Integer stock) { this.stock = new NonNegativeInteger(stock); }
+    public void setAvailable(Boolean available) { this.available = available != null && available; }
+    public void setImages(List<String> images) { this.images = images == null ? new ArrayList<>() : new ArrayList<>(images); }
+    public void setAttributes(Map<String, Object> attributes) { this.attributes = attributes == null ? new HashMap<>() : new HashMap<>(attributes); }
+    // Por su complejidad, se declaran protegidos para que no puedan ser modificados por el servicio.
+    protected void setProductId(String productId) { this.productId = new NonBlankString(productId); }
 }

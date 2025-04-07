@@ -7,9 +7,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serial;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Entidad Producto: Información base, atributos estáticos y definición de opciones de variante.
@@ -19,90 +17,55 @@ public class Product extends BaseEntity<String> {
     @Serial
     private static final long serialVersionUID = 1L;
     // --- Atributos básicos ---
+    @Indexed(collation = "{'locale': 'es', 'strength': 2}")
     private NonBlankString name;
     private String description;
+    private List<Attribute> attributeDefinitions; // Cuyas opciones generan las variantes
     // --- Atributos referentes a otros documentos ---
-    @Indexed private String brandId;
-    @Indexed private List<NonBlankString> categoriesId;
-    // --- Atributos adicionales del producto ---
-    private Map<NonBlankString, NonBlankString> staticAttributes; // Estáticos/Descriptivos (clave-valor simples)
-    private List<Attribute> dynamicAttributes; // Cuyas opciones generan las variantes
+    @Indexed private NonBlankString brandId;
+    @Indexed private List<String> categoriesId;
 
     /**
      * Constructor por defecto para la entidad Product.
      */
-    public Product() {
-        super("55");
-        this.description = "";
-        this.brandId = "";
-        this.categoriesId = Collections.emptyList();
-        this.staticAttributes = Collections.emptyMap();
-        this.dynamicAttributes = Collections.emptyList();
-    }
-
-    // --- Métodos funcionales ---
+    public Product() { super(); }
 
     /**
-     * Añade un atributo estático al mapa de atributos estáticos del producto.
-     * Las cadenas de clave y valor proporcionadas deben estar en blanco y se normalizan antes de ser añadidas.
-     * @param key la clave del atributo, no debe ser nula ni estar en blanco
-     * @param value el valor del atributo, no debe ser nulo ni estar en blanco
+     * Construye un nuevo producto con los detalles especificados.
+     * @param id el identificador único del producto; no debe ser nulo.
+     * @param name el nombre del producto; no debe ser nulo ni estar en blanco.
+     * @param description la descripción del producto; si es nulo, se asignará una cadena vacía.
+     * @param brandId el identificador de la marca asociada al producto; si es nulo, se asignará una cadena vacía.
+     * @param categoriesId lista de categorías a las que pertenece el producto.
+     * @param attributeDefinitions lista de atributos adicionales predefinidos del producto.
      */
-    public void putStaticAttribute(String key, String value) {
-        NonBlankString availableKey = new NonBlankString(key);
-        NonBlankString availableValue = new NonBlankString(value);
-        this.staticAttributes.put(availableKey, availableValue);
-    }
-
-    /**
-     * Elimina un atributo estático del mapa de atributos estáticos del producto.
-     * La clave proporcionada se valida para garantizar que no es nula o está vacía antes de intentar eliminarla.
-     * @param key la clave del atributo estático a eliminar; no debe ser nula ni estar en blanco.
-     */
-    public void removeStaticAttribute(String key) {
-        NonBlankString availableKey = new NonBlankString(key);
-        if(this.staticAttributes.remove(availableKey) != null){
-        }
-    }
-
-    /**
-     * Asigna el producto a una categoría específica añadiendo el ID de categoría proporcionado
-     * a la lista de ID de categoría asociados si no está ya presente.
-     * @param categoryId el ID de la categoría a la que asignar el producto; no debe ser nulo ni estar en blanco.
-     */
-    public void assignToCategory(String categoryId) {
-        NonBlankString availableCategoryId = new NonBlankString(categoryId);
-         if (!this.categoriesId.contains(availableCategoryId)) {
-             this.categoriesId.add(availableCategoryId);
-         }
-    }
-
-    /**
-     * Elimina la categoría especificada de la lista de identificadores de categoría asignados al producto.
-     * El ID de categoría introducido se valida para asegurarse de que no es nulo o está en blanco antes de intentar la eliminación.
-     * @param categoryId el ID de la categoría a eliminar; no debe ser nulo ni estar en blanco.
-     */
-    public void removeFromCategory(String categoryId) {
-        NonBlankString availableCategoryId = new NonBlankString(categoryId);
-        if(this.categoriesId.remove(availableCategoryId)){
-        }
+    public Product(String id, String name, String description, String brandId,
+                   List<String> categoriesId, List<Attribute> attributeDefinitions) {
+        super(id);
+        setName(name);
+        setDescription(description);
+        setBrandId(brandId);
+        setCategoriesId(categoriesId);
+        setAttributeDefinitions(attributeDefinitions);
     }
 
     // --- Getters ---
 
-    public String getName() { return name.value(); }
+    public NonBlankString getName() { return name; }
     public String getDescription() { return description; }
-    public String getBrandId() { return brandId; }
-    public List<NonBlankString> getCategoryId() { return Collections.unmodifiableList(categoriesId); }
-    public Map<NonBlankString, NonBlankString> getStaticAttributes() { return Collections.unmodifiableMap(staticAttributes); }
-    public List<Attribute> getDynamicAttributes() { return Collections.unmodifiableList(dynamicAttributes); }
+    public NonBlankString getBrandId() { return brandId; }
+    public List<Attribute> getAttributeDefinitions() { return Collections.unmodifiableList(attributeDefinitions); }
+    public List<String> getCategoriesId() { return Collections.unmodifiableList(categoriesId); }
 
     // --- Setters ---
 
     public void setName(String name) { this.name = new NonBlankString(name); }
-    public void setDescription(String description) { this.description = description == null ? "" : description; }
-    public void setBrandId(String brandId) { this.brandId = brandId == null ? "" : brandId; }
-    public void setCategoryId(List<NonBlankString> categoryId) { this.categoriesId = categoryId == null ? Collections.emptyList() : List.copyOf(categoryId); }
-    public void setStaticAttributes(Map<NonBlankString, NonBlankString> staticAttributes) { this.staticAttributes = staticAttributes == null ? Collections.emptyMap() : Map.copyOf(staticAttributes); }
-    public void setDynamicAttributes(List<Attribute> dynamicAttributes) { this.dynamicAttributes = dynamicAttributes == null ? Collections.emptyList() : List.copyOf(dynamicAttributes); }
+    public void setDescription(String description) { this.description = description == null || description.isBlank() ? null : description.trim(); }
+    public void setBrandId(String brandId) { this.brandId = brandId == null || brandId.isBlank() ? null : new NonBlankString(brandId); }
+    public void setCategoriesId(List<String> categoriesId) { this.categoriesId = categoriesId == null ? new ArrayList<>(): new ArrayList<>(categoriesId); }
+    // Por su complejidad, se declaran protegidos para que no puedan ser modificados por el servicio
+    protected void setAttributeDefinitions(List<Attribute> attributeDefinitions) { this.attributeDefinitions = attributeDefinitions == null ? Collections.emptyList() : List.copyOf(attributeDefinitions); }
+
+    // --- Métodos funcionales no son declarados para simplificar la implementación ---
+    // ej. public void addCategory; public void addStaticAttribute; etc.
 }

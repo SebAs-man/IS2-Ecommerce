@@ -55,16 +55,16 @@ public abstract class BaseEntity<ID extends Serializable> implements Serializabl
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
         BaseEntity<?> other = (BaseEntity<?>) obj;
         return this.id != null && Objects.equals(this.id, other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     @Override

@@ -62,7 +62,6 @@ public class CategoryController implements ReadController<CategoryResponseDTO, S
 
     /**
      * Busca categorías por nombre y devuelve una lista paginada de resultados.
-     *
      * @param name el nombre o parte del nombre de la categoría para filtrar los resultados.
      * @param pageable los parámetros de paginación y ordenación.
      * @return una respuesta HTTP que contiene una página de categorías que coinciden con el criterio de búsqueda, encapsulada en objetos CategoryResponseDTO.
@@ -93,7 +92,8 @@ public class CategoryController implements ReadController<CategoryResponseDTO, S
      * @return una ResponseEntity que contiene el objeto CategoryResponseDTO creado y un encabezado de ubicación que apunta al URI de la categoría recién creada.
      */
     @PostMapping
-    public ResponseEntity<CategoryResponseDTO> createCategory(@Valid @RequestBody CreateCategoryRequestDTO request) {
+    public ResponseEntity<CategoryResponseDTO> createCategory(
+            @Valid @RequestBody CreateCategoryRequestDTO request) {
         CategoryResponseDTO response = service.save(request);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{id}")
