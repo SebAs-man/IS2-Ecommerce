@@ -1,15 +1,14 @@
 package com.ecommerce.catalog.product.domain.model;
 
 import com.ecommerce.catalog.sharedkernel.domain.model.BaseEntity;
-import com.ecommerce.catalog.sharedkernel.domain.model.vo.Money;
-import com.ecommerce.catalog.sharedkernel.domain.model.vo.NonBlankString;
-import com.ecommerce.catalog.sharedkernel.domain.model.vo.NonNegativeInteger;
+import com.ecommerce.libs.domain.vo.Money;
+import com.ecommerce.libs.domain.vo.NonBlankString;
+import com.ecommerce.libs.domain.vo.NonNegativeInteger;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serial;
-import java.math.BigDecimal;
 import java.util.*;
 
 /**

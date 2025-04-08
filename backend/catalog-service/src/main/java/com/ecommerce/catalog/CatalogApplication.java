@@ -2,10 +2,10 @@ package com.ecommerce.catalog;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * La clase CatalogApplication sirve como punto de entrada para la aplicación.
@@ -18,6 +18,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableMongoAuditing
 @EnableMongoRepositories
 @EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
+@ComponentScan(basePackages = {
+		"com.ecommerce.catalog", // Paquete base de este microservicio
+		"com.ecommerce.libs" // Paquete base de tu librería compartida
+})
 public class CatalogApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(CatalogApplication.class, args);

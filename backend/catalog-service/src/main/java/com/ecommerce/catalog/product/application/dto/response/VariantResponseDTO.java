@@ -1,10 +1,9 @@
 package com.ecommerce.catalog.product.application.dto.response;
 
-import com.ecommerce.catalog.sharedkernel.application.dto.MoneyDTO;
+import com.ecommerce.libs.application.dto.MoneyDTO;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;

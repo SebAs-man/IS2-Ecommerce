@@ -1,7 +1,7 @@
 package com.ecommerce.catalog.category.domain.model;
 
 import com.ecommerce.catalog.sharedkernel.domain.model.BaseEntity;
-import com.ecommerce.catalog.sharedkernel.domain.model.vo.NonBlankString;
+import com.ecommerce.libs.domain.vo.NonBlankString;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -9,7 +9,6 @@ import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Entidad que representa una Categoría en la jerarquía del catálogo (Array of Ancestors).

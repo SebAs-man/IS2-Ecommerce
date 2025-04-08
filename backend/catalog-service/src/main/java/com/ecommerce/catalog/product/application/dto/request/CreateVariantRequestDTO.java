@@ -1,6 +1,6 @@
 package com.ecommerce.catalog.product.application.dto.request;
 
-import com.ecommerce.catalog.sharedkernel.application.dto.MoneyDTO;
+import com.ecommerce.libs.application.dto.MoneyDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 

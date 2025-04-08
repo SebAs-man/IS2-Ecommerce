@@ -4,7 +4,7 @@ import com.ecommerce.catalog.product.application.dto.response.AttributeResponseD
 import com.ecommerce.catalog.product.application.dto.response.ProductResponseDTO;
 import com.ecommerce.catalog.product.domain.model.Product;
 import com.ecommerce.catalog.product.domain.model.vo.Attribute;
-import com.ecommerce.catalog.sharedkernel.application.mapper.ValueObjectMapper;
+import com.ecommerce.libs.application.mapper.ValueObjectMapper;
 import org.mapstruct.Mapper;
 import org.springframework.data.domain.Page;
 

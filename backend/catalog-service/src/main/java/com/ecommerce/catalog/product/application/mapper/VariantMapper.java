@@ -2,9 +2,7 @@ package com.ecommerce.catalog.product.application.mapper;
 
 import com.ecommerce.catalog.product.application.dto.response.VariantResponseDTO;
 import com.ecommerce.catalog.product.domain.model.Variant;
-import com.ecommerce.catalog.sharedkernel.application.dto.MoneyDTO;
-import com.ecommerce.catalog.sharedkernel.application.mapper.ValueObjectMapper;
-import com.ecommerce.catalog.sharedkernel.domain.model.vo.Money;
+import com.ecommerce.libs.application.mapper.ValueObjectMapper;
 import org.mapstruct.Mapper;
 import org.springframework.data.domain.Page;
 

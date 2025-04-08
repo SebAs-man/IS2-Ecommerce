@@ -2,7 +2,7 @@ package com.ecommerce.catalog.brand.application.mapper;
 
 import com.ecommerce.catalog.brand.application.dto.response.BrandResponseDTO;
 import com.ecommerce.catalog.brand.domain.model.Brand;
-import com.ecommerce.catalog.sharedkernel.application.mapper.ValueObjectMapper;
+import com.ecommerce.libs.application.mapper.ValueObjectMapper;
 import org.mapstruct.Mapper;
 import org.springframework.data.domain.Page;
 

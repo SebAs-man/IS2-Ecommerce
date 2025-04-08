@@ -2,7 +2,7 @@ package com.ecommerce.catalog.category.application.mapper;
 
 import com.ecommerce.catalog.category.application.dto.response.CategoryResponseDTO;
 import com.ecommerce.catalog.category.domain.model.Category;
-import com.ecommerce.catalog.sharedkernel.application.mapper.ValueObjectMapper;
+import com.ecommerce.libs.application.mapper.ValueObjectMapper;
 import org.mapstruct.Mapper;
 import org.springframework.data.domain.Page;
 

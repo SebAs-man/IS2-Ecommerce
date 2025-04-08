@@ -1,7 +1,7 @@
 package com.ecommerce.catalog.product.domain.model.vo;
 
 import com.ecommerce.catalog.product.domain.constant.AttributeType;
-import com.ecommerce.catalog.sharedkernel.domain.model.vo.NonBlankString;
+import com.ecommerce.libs.domain.vo.NonBlankString;
 
 import java.io.Serial;
 import java.io.Serializable;

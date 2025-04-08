@@ -1,7 +1,7 @@
 package com.ecommerce.catalog.brand.domain.model;
 
 import com.ecommerce.catalog.sharedkernel.domain.model.BaseEntity;
-import com.ecommerce.catalog.sharedkernel.domain.model.vo.NonBlankString;
+import com.ecommerce.libs.domain.vo.NonBlankString;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 

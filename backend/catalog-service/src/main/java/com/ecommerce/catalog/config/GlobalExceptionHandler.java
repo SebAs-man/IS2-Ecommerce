@@ -1,9 +1,9 @@
 package com.ecommerce.catalog.config;
 
+import com.ecommerce.libs.application.dto.ErrorResponseDTO;
 import com.ecommerce.catalog.category.domain.exception.CategoryNotEmptyException;
 import com.ecommerce.catalog.product.application.exception.InvalidVariantAttributesException;
-import com.ecommerce.catalog.sharedkernel.application.dto.ErrorResponseDTO;
-import com.ecommerce.catalog.sharedkernel.application.exception.ResourceNotFoundException;
+import com.ecommerce.libs.application.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
