@@ -1,6 +1,6 @@
 # Microservicio de Catálogo (`catalog-service`)
 
-**Contexto:** Este servicio es parte del [Monorepo E-commerce IS2](../../../README.md). Su código reside en `backend/catalog-service/`.
+**Contexto:** Este servicio es parte del [Monorepo E-commerce IS2](../../README.md). Su código reside en `backend/catalog-service/`.
 Consulta el [README del Backend](../README.md) para patrones arquitectónicos, stack tecnológico y convenciones comunes a todos los microservicios backend.
 
 ## 1. Descripción Específica
